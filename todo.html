@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+ <html lang="en">
+ <head>
+ <meta charset="UTF-8">
+ <title>To-Do List App</title>
+ <style>
+ body {
+ font-family: Georgia, "Times New Roman", Times, serif;
+ background-color: #f8f9fa;
+ margin: 0;
+ padding: 0;
+ }
+ .container {
+ width: 600px;
+ margin: 50px auto;
+ background: #ffffff;
+ border: 1px solid #ccc;
+ border-radius: 8px;
+ box-shadow: 0 0 10px #ccc;
+ padding: 20px;
+ }
+ h2 {
+ background-color: #4CAF50;
+ color: white;
+ padding: 10px;
+ text-align: center;
+ margin-top: 0;
+ }
+ #new-task {
+ width: 75%;
+ padding: 10px;
+ border: 1px solid #ccc;
+ border-radius: 4px;
+ }
+ #add-btn {
+ padding: 10px 20px;
+ background-color: #4CAF50;
+ color: white;
+ border: none;
+ border-radius: 4px;
+ cursor: pointer;
+ margin-left: 10px;
+ }
+ ul {
+ list-style: none;
+ padding: 0;
+ margin-top: 20px;
+ }
+ li {
+ background: #e9ecef;
+ margin-bottom: 10px;
+ padding: 12px;
+ border-radius: 4px;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ cursor: move;
+ }
+ .delete-btn {
+ background-color: #dc3545;
+ border: none;
+ color: white;
+ padding: 6px 10px;
+ border-radius: 4px;
+ cursor: pointer;
+ }
+ .dragging {
+ opacity: 0.5;
+ }
+ </style>
+ </head>
+ <body>
+ <div class="container">
+ <div style="text-align: right;">
+ <a href="menu.html" style="margin-right: 10px;">Back to Menu</a>
+ <a href="login.html">Logout</a>
+ </div>
+ <h2>To-Do List</h2>
+ <input type="text" id="new-task" placeholder="Enter a new task" />
+ <button id="add-btn">Add</button>
+ <ul id="task-list"></ul>
+ </div>
+ <script>
+ const taskInput = document.getElementById('new-task');
+ const addBtn = document.getElementById('add-btn');
+ const taskList = document.getElementById('task-list');
+ addBtn.addEventListener('click', addTask);
+ taskList.addEventListener('dragstart', dragStart);
+ taskList.addEventListener('dragover', dragOver);
+ taskList.addEventListener('drop', drop);
+ function addTask() {
+ const taskText = taskInput.value.trim();
+ if (taskText === '') return;
+ const li = document.createElement('li');
+ li.textContent = taskText;
+ li.setAttribute('draggable', 'true');
+ const deleteBtn = document.createElement('button');
+ deleteBtn.textContent = 'Delete';
+ deleteBtn.className = 'delete-btn';
+ deleteBtn.onclick = () => li.remove();
+ li.appendChild(deleteBtn);
+ taskList.appendChild(li);
+ taskInput.value = '';
+ }
+ let draggedItem = null;
+ function dragStart(e) {
+ draggedItem = e.target;
+ e.target.classList.add('dragging');
+ }
+ function dragOver(e) {
+ e.preventDefault();
+ const afterElement = getDragAfterElement(taskList, e.clientY);
+ if (afterElement == null) {
+ taskList.appendChild(draggedItem);
+ } else {
+ taskList.insertBefore(draggedItem, afterElement);
+ }
+ }
+ function drop(e) {
+ e.preventDefault();
+ draggedItem.classList.remove('dragging');
+ draggedItem = null;
+ }
+ function getDragAfterElement(container, y) {
+ const draggableElements = [...container.querySelectorAll('li:not(.dragging)')];
+ return draggableElements.reduce((closest, child) => {
+ const box = child.getBoundingClientRect();
+ const offset = y - box.top - box.height / 2;
+ if (offset < 0 && offset > closest.offset) {
+ return { offset: offset, element: child };
+ } else {
+ return closest;
+ }
+ }, { offset: Number.NEGATIVE_INFINITY }).element;
+ }
+ </script>
+ </body>
+ </html>
